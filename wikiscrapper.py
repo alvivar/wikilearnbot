@@ -153,11 +153,11 @@ if __name__ == "__main__":
 
     # Testing
 
-    with open(os.path.join(HOME, "random-en.json"), "w") as f:
+    with open(os.path.join(HOME, "example-en.json"), "w") as f:
         json.dump(get_wiki_summary(get_random_wiki(language="en")), f)
 
-    with open(os.path.join(HOME, "random-es.json"), "w") as f:
+    with open(os.path.join(HOME, "example-es.json"), "w") as f:
         json.dump(get_wiki_summary(get_random_wiki(language="es")), f)
 
-    with open(os.path.join(HOME, "summary.json"), "w") as f:
+    with open(os.path.join(HOME, "example-love.json"), "w") as f:
         json.dump(get_wiki_summary('https://en.wikipedia.org/wiki/Love'), f)
