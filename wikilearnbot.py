@@ -7,11 +7,11 @@
 
 import json
 import os
+import random
 import shutil
 import sys
 import time
-import urllib.request
-import random
+from urllib.request import urlopen
 
 from wikiscrapper import get_random_wiki, get_wiki_summary
 
@@ -25,6 +25,7 @@ def get_random_wikis(count, lang="en", wait=4):
         Return a list with Wikipedia articles dictionaries that contains images.
     """
     wikis = []
+    print(f"Looking for {count} random Wikipedia articles...")
     while count > 0:
         wiki = get_wiki_summary(
             get_random_wiki(language=lang), minimgsize=250, incfalseimg=True)
@@ -32,11 +33,11 @@ def get_random_wikis(count, lang="en", wait=4):
         url = list(wiki.keys())[0]
         imgs = list(wiki.values())[0]['images']
         if imgs:
-            print(f"Added: {url}")
+            print(f"Found #{count} '{url}'")
             wikis.append(wiki)
             count -= 1
         else:
-            print(f"Discarded, no images: {url}")
+            print(f"Discarded, no images '{url}'")
 
         time.sleep(random.uniform(wait - 1, wait + 1))
 
@@ -45,16 +46,38 @@ def get_random_wikis(count, lang="en", wait=4):
 
 if __name__ == "__main__":
 
-    print("@wikilearnbot")
     DELTA = time.time()
+    print("@wikilearnbot\n")
 
     QBOTJSON = os.path.join(HOME, "qbot.json")
     try:
         QBOT = json.load(open(QBOTJSON, "r"))
     except (IOError, ValueError):
-        print(f"QBot file not found:\n'{QBOTJSON}'")
-        input()
-        sys.exit(1)
+        QBOT = {
+            "options": {
+                "refresh_schedule": True
+            },
+            "schedule": {
+                "name":
+                "wikilearnbot",
+                "days": [
+                    "monday", "tuesday", "wednesday", "thursday", "friday",
+                    "saturday", "sunday"
+                ],
+                "hours": [
+                    "8:00", "9:00", "10:00", "11:00", "12:00", "13:00",
+                    "14:00", "15:00", "16:00", "17:00", "18:00", "19:00",
+                    "20:00", "21:00", "22:00"
+                ]
+            },
+            "twitter_tokens": {
+                "consumer_key": "find",
+                "consumer_secret": "them",
+                "oauth_token": "on",
+                "oauth_secret": "apps.twitter.com"
+            },
+            "messages": []
+        }
 
     # Download wikis, one per schedule
 
@@ -68,24 +91,38 @@ if __name__ == "__main__":
     with open(os.path.join(WIKISPATH, f"{round(time.time())}.json"), 'w') as f:
         json.dump(WIKIS, f)
 
-    # Download images
+    # Prepare messages and Download images
+
+    TWEETS = []
 
     IMGPATH = os.path.join(HOME, "images")
     if not os.path.exists(IMGPATH):
         os.makedirs(IMGPATH)
 
+    print("Downloading images...")
     for wiki in WIKIS:
-        for _, v in wiki.items():
-            for imgk, _ in v['images'].items():
+        for urlkey, val in wiki.items():
 
-                imgfile = os.path.join(IMGPATH, os.path.basename(imgk))
-
-                with urllib.request.urlopen(imgk) as r, open(imgfile,
-                                                             'wb') as f:
+            # Images
+            for imgkey, _ in val['images'].items():
+                imgfile = os.path.join(IMGPATH, os.path.basename(imgkey))
+                with urlopen(imgkey) as r, open(imgfile, 'wb') as f:
                     shutil.copyfileobj(r, f)
-                    print(f"Downloaded: '{imgfile}'")
+                    print(f"Downloaded '{imgfile}'")
+                break  # Just one image
 
-    # QBot queue TODO
+            # Tweets
+            desc = val['description']
+            desc = desc if len(desc) < 250 else f"{desc[:250]}[...]"
+
+            TWEETS.append({'text': f"{desc} {urlkey}", 'image': imgfile})
+
+    # QBot queue
+    QBOT['messages'] = QBOT['messages'] + TWEETS
+
+    with open(QBOTJSON, "w") as f:
+        json.dump(QBOT, f)
+        print(f"{len(TWEETS)} tweets queued on '{QBOTJSON}'")
 
     # The end
-    print(f"\nDone! ({round(time.time() - DELTA)}s)")
+    input(f"\nDone! ({round(time.time() - DELTA)}s)")
