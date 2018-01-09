@@ -11,6 +11,7 @@ import shutil
 import sys
 import time
 import urllib.request
+import random
 
 from wikiscrapper import get_random_wiki, get_wiki_summary
 
@@ -37,7 +38,7 @@ def get_random_wikis(count, lang="en", wait=4):
         else:
             print(f"Discarded, no images: {url}")
 
-        time.sleep(wait)
+        time.sleep(random.uniform(wait - 1, wait + 1))
 
     return wikis
 
@@ -81,8 +82,8 @@ if __name__ == "__main__":
 
                 with urllib.request.urlopen(imgk) as r, open(imgfile,
                                                              'wb') as f:
-                    print(f"Downloading: '{imgfile}'")
                     shutil.copyfileobj(r, f)
+                    print(f"Downloaded: '{imgfile}'")
 
     # QBot queue TODO
 
