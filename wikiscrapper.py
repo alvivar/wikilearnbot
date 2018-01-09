@@ -31,6 +31,34 @@ def intfalse(nstr):
     return n
 
 
+def filter_wiki_images(imagesdict, size, includefalse=False):
+    """
+        Return a filtered imagesdict with a size >=, or false. Assuming the
+        image dict as:
+
+            "images": {
+                "https://wikimedia.org/180px-Plutchik-wheel.svg.png": {
+                    "size": 180
+                },
+                "https://wikimedia.org/340px-DickseeRomeoandJuliet.jpg": {
+                    "size": 340
+                },
+                "https://wikimedia.org/Heart_icon_red_hollow.svg.png": {
+                    "size": false
+                }
+            }
+    """
+
+    filtered = {}
+    for k, v in imagesdict.items():
+        if v['size'] >= size:
+            filtered[k] = v
+        if includefalse and v['size'] == False:
+            filtered[k] = v
+
+    return filtered
+
+
 def get_random_wiki(language="en"):
     """
         Return a random Wikipedia article url.
@@ -53,7 +81,7 @@ def get_random_wiki(language="en"):
     return None
 
 
-def get_wiki_summary(url):
+def get_wiki_summary(url, minimgsize=None, incfalseimg=False):
     """
         Return a dictionary with a summary of a Wikipedia page.
     """
@@ -104,6 +132,10 @@ def get_wiki_summary(url):
             }
             for img in images
         }
+
+        if minimgsize:
+            images = filter_wiki_images(
+                images, minimgsize, includefalse=incfalseimg)
     except AttributeError:
         images = False
 
