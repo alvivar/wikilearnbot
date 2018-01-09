@@ -125,6 +125,7 @@ def get_wiki_summary(url, minimgsize=None, incfalseimg=False):
         ]
 
         # Sometimes the size is in the name e.g. '480px-Map_of_USA_SD.svg.png'
+        # TODO maybe this should be a regex
         images = {
             img: {
                 'size': intfalse(
