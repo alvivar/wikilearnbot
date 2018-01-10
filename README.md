@@ -1,5 +1,9 @@
 # wikilearnbot
 
-Bot that tweets random articles with images from Wikipedia.
+## Bot that tweets random articles with images from Wikipedia.
 
-- The tweet publication queue is handled by Qbot through qbot.json
+### [@wikilearnbot](https://twitter.com/wikilearnbot)
+
+### Details
+
+- **wikilearnbot.py** handles the tweet publication queue through **Qbot** in **qbot.json**
