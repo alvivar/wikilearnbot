@@ -5,5 +5,5 @@
 ### Details
 
 - **wikiscrapper.py** scraps the data
-- **wikilearnbot.py** handles the tweet publication queue through **[Qbot](https://github.com/alvivar/qbot)** modifying **qbot.json**
+- **wikilearnbot.py** handles the tweet publication queue through **[Qbot](https://github.com/alvivar/qbot)**
 - Check it out! **[@wikilearnbot](https://twitter.com/wikilearnbot)**
