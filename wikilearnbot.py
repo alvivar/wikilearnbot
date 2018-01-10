@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
             TWEETS.append({'text': f"{desc} {urlkey}", 'image': imgfile})
 
-    # QBot queue
+    # Qbot queue
     QBOT['messages'] = QBOT['messages'] + TWEETS
 
     with open(QBOTJSON, "w") as f:
