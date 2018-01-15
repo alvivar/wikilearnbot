@@ -4,6 +4,6 @@
 
 ### Details
 
-- **wikiscrapper.py** scraps the data
-- **wikilearnbot.py** handles the tweet publication queue through **[Qbot](https://github.com/alvivar/qbot)**
+- **wikiscrapper.py** scraps data from **Wikipedia** random articles
+- **wikilearnbot.py** in one run gets all the data and queue the tweets using **[Qbot](https://github.com/alvivar/qbot)**
 - Check it out! **[@wikilearnbot](https://twitter.com/wikilearnbot)**
