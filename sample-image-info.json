@@ -1,0 +1,28 @@
+{
+    "batchcomplete": true,
+    "query": {
+        "normalized": [
+            {
+                "fromencoded": false,
+                "from": "File:USA_Wisconsin_location_map.svg",
+                "to": "File:USA Wisconsin location map.svg"
+            }
+        ],
+        "pages": [
+            {
+                "ns": 6,
+                "title": "File:USA Wisconsin location map.svg",
+                "missing": true,
+                "known": true,
+                "imagerepository": "shared",
+                "imageinfo": [
+                    {
+                        "url": "https://upload.wikimedia.org/wikipedia/commons/2/27/USA_Wisconsin_location_map.svg",
+                        "descriptionurl": "https://commons.wikimedia.org/wiki/File:USA_Wisconsin_location_map.svg",
+                        "descriptionshorturl": "https://commons.wikimedia.org/w/index.php?curid=7193590"
+                    }
+                ]
+            }
+        ]
+    }
+}
