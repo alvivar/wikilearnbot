@@ -87,16 +87,23 @@ def get_random_articles_with_images(count=1, lang='en', rest=5, ignoreids=[]):
 
     # Filtering only with images
 
+    print("Looking for articles with images...")
     withimages = []
     while len(withimages) < count:
         ranart = get_random_articles(count=count, lang=lang)
-        withimages += [d for d in ranart['query']['pages'] if 'pageimage' in d]
+        withimages += [
+            d for d in ranart['query']['pages']
+            if 'pageimage' in d and d['pageid'] not in ignoreids
+        ]
+        withimages = withimages[:count]
+        print(f"{round(len(withimages) / count * 100)}%")
         time.sleep(rest)  # Decent +1
 
     # A simpler json response, including images urls
 
     result = []
     for w in withimages:
+        print(f"Found: {w['title']}")
         title = urllib.parse.quote_plus(w['title'].replace(' ', '_'))
         result.append({
             'pageid': w['pageid'],
@@ -107,19 +114,18 @@ def get_random_articles_with_images(count=1, lang='en', rest=5, ignoreids=[]):
             'pageimageurl': get_image_url(w['pageimage'])
         })
 
-    return result[:count]
+    return result
 
 
 if __name__ == "__main__":
 
     # Tests
 
-    with open(os.path.join(HOME, "sample-random-articles.json"), 'w') as f:
+    with open(os.path.join(HOME, "sample-articles.json"), 'w') as f:
         json.dump(get_random_articles(count=5), f)
 
-    with open(os.path.join(HOME, "sample-image-info.json"), 'w') as f:
+    with open(os.path.join(HOME, "sample-image.json"), 'w') as f:
         json.dump(get_image_info("USA_Wisconsin_location_map.svg"), f)
 
-    with open(os.path.join(HOME, "sample-random-articles-images.json"),
-              'w') as f:
+    with open(os.path.join(HOME, "sample-articles-images.json"), 'w') as f:
         json.dump(get_random_articles_with_images(5), f)
