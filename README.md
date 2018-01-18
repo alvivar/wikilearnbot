@@ -1,6 +1,6 @@
 # wikilearnbot
 
-## Bot that tweets random articles with images from Wikipedia! <3
+## Bot that tweets random articles with images from Wikipedia <3
 
 ### Details
 
