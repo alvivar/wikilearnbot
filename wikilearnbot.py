@@ -1,5 +1,5 @@
 """
-    Queues Wikipedia articles with images on qbot.json as available.
+    Queues Wikipedia articles with images on Qbot.
 
     @matnesis
     2018/01/08
@@ -13,45 +13,35 @@ import sys
 import time
 from urllib.request import urlopen
 
-from wikiscrapper import get_random_wiki, get_wiki_summary
+from wikiapi import get_random_articles_with_images
+
+# Deprecated, I keep this line to remember
+# from wikiscrapper import get_random_wiki, get_wiki_summary
 
 HOME = os.path.normpath(  # The script directory + cxfreeze compatibility
     os.path.dirname(
         sys.executable if getattr(sys, 'frozen', False) else __file__))
-
-
-def get_random_wikis(count, lang="en", wait=4):
-    """
-        Return a list with Wikipedia articles dictionaries that contains images.
-    """
-    wikis = []
-    print(f"Looking for {count} random Wikipedia articles...")
-    while count > 0:
-        wiki = get_wiki_summary(
-            get_random_wiki(language=lang), minimgsize=250, incfalseimg=True)
-
-        url = list(wiki.keys())[0]
-        imgs = list(wiki.values())[0]['images']
-        if imgs:
-            print(f"Found #{count} '{url}'")
-            wikis.append(wiki)
-            count -= 1
-        else:
-            print(f"Discarded, no images '{url}'")
-
-        time.sleep(random.uniform(wait - 1, wait + 1))
-
-    return wikis
-
 
 if __name__ == "__main__":
 
     DELTA = time.time()
     print("@wikilearnbot\n")
 
+    # Config
+
+    CONFIGJSON = os.path.join(HOME, "config.json")
+    try:
+        with open(CONFIGJSON, "r") as f:
+            CONFIG = json.load(f)
+    except (IOError, ValueError):
+        CONFIG = {'known_ids': []}
+
+    # Qbot
+
     QBOTJSON = os.path.join(HOME, "qbot.json")
     try:
-        QBOT = json.load(open(QBOTJSON, "r"))
+        with open(QBOTJSON, "r") as f:
+            QBOT = json.load(f)
     except (IOError, ValueError):
         QBOT = {
             "options": {
@@ -78,7 +68,8 @@ if __name__ == "__main__":
     # Download wikis, one per schedule
 
     NEEDED = len(QBOT['schedule']['hours'])
-    WIKIS = get_random_wikis(NEEDED)
+    WIKIS = get_random_articles_with_images(
+        count=NEEDED, ignoreids=CONFIG['known_ids'])
 
     WIKISPATH = os.path.join(HOME, "wikis")
     if not os.path.exists(WIKISPATH):
@@ -89,36 +80,48 @@ if __name__ == "__main__":
 
     # Prepare messages and Download images
 
-    TWEETS = []
-
     IMGPATH = os.path.join(HOME, "images")
     if not os.path.exists(IMGPATH):
         os.makedirs(IMGPATH)
 
-    print("Downloading images...")
+    TWEETS = []
+    NEWIDS = []
+
+    print("\nDownloading images...")
     for wiki in WIKIS:
-        for urlkey, val in wiki.items():
 
-            # Images
-            for imgkey, _ in val['images'].items():
-                imgfile = os.path.join(IMGPATH, os.path.basename(imgkey))
-                with urlopen(imgkey) as r, open(imgfile, 'wb') as f:
-                    shutil.copyfileobj(r, f)
-                    print(f"Downloaded '{imgfile}'")
-                break  # Just one image
+        NEWIDS.append(wiki['pageid'])
 
-            # Tweets
-            desc = val['description']
-            desc = desc if len(desc) < 250 else f"{desc[:250]}[...]"
+        # Images
 
-            TWEETS.append({'text': f"{desc} {urlkey}", 'image': imgfile})
+        imgfile = os.path.join(IMGPATH, os.path.basename(wiki['pageimageurl']))
+        with urlopen(wiki['pageimageurl']) as r, open(imgfile, 'wb') as f:
+            shutil.copyfileobj(r, f)
+            print(f"Downloaded: {imgfile}")
+
+        # Tweets
+
+        desc = wiki['extract']
+        desc = desc if len(desc) < 250 else f"{desc[:250]}[...]"
+
+        TWEETS.append({'text': f"{desc} {wiki['pageurl']}", 'image': imgfile})
+
+    # Config
+
+    CONFIG['known_ids'] += NEWIDS
+
+    with open(CONFIGJSON, 'w') as f:
+        json.dump(CONFIG, f)
+        print(f"\nArticles {NEWIDS} saved on: {CONFIGJSON}")
 
     # Qbot queue
+
     QBOT['messages'] = QBOT['messages'] + TWEETS
 
-    with open(QBOTJSON, "w") as f:
+    with open(QBOTJSON, 'w') as f:
         json.dump(QBOT, f)
-        print(f"{len(TWEETS)} tweets queued on '{QBOTJSON}'")
+        print(f"{len(TWEETS)} tweets queued on: {QBOTJSON}")
 
     # The end
-    input(f"\nDone! ({round(time.time() - DELTA)}s)")
+
+    print(f"\nDone! ({round(time.time() - DELTA)}s)")
