@@ -1,5 +1,5 @@
 """
-    Wikipedia API wrapper for random articles and images.
+    Wikipedia API wrapper for random articles and their images.
 
     @matnesis
     2018/01/17
@@ -27,8 +27,8 @@ def get_random_articles(count=1, lang='en'):
     response = requests.get(
         f"https://{lang}.wikipedia.org/w/api.php",
         params={
-            'action': 'query',
             'formatversion': '2',
+            'action': 'query',
             'format': 'json',
             'generator': 'random',
             'grnlimit': count,
@@ -45,7 +45,7 @@ def get_random_articles(count=1, lang='en'):
     return response.json()
 
 
-def get_image_info(imagename):
+def get_image_info(name, size):
     """
         Return a json with the image info from Wikipedia API.
     """
@@ -53,12 +53,13 @@ def get_image_info(imagename):
     response = requests.get(
         f"https://en.wikipedia.org/w/api.php",
         params={
-            'action': 'query',
             'formatversion': '2',
+            'action': 'query',
             'format': 'json',
             'prop': 'imageinfo',
-            'titles': f"File:{imagename}",
-            'iiprop': 'url'
+            'titles': f"File:{name}",
+            'iiprop': 'url',
+            'iiurlwidth': size
         },
         headers={
             'User-Agent':
@@ -68,15 +69,19 @@ def get_image_info(imagename):
     return response.json()
 
 
-def get_image_url(imagename):
+def get_image_url(name, size):
     """
         Return the url from the Wikipedia image.
     """
-    info = get_image_info(imagename)
-    return info['query']['pages'][0]['imageinfo'][0]['url']  # Optimism +1
+    info = get_image_info(name, size=size)
+    return info['query']['pages'][0]['imageinfo'][0]['thumburl']  # Optimism +1
 
 
-def get_random_articles_with_images(count=1, lang='en', rest=5, ignoreids=[]):
+def get_random_articles_with_images(count=1,
+                                    imagesize=400,
+                                    lang='en',
+                                    rest=5,
+                                    ignoreids=[]):
     """
         Return a json file with a list of random articles that always contain a
         main image.
@@ -111,7 +116,7 @@ def get_random_articles_with_images(count=1, lang='en', rest=5, ignoreids=[]):
             'title': w['title'],
             'extract': w['extract'],
             'pageimage': w['pageimage'],
-            'pageimageurl': get_image_url(w['pageimage'])
+            'pageimageurl': get_image_url(w['pageimage'], imagesize)
         })
 
     return result
@@ -125,7 +130,7 @@ if __name__ == "__main__":
         json.dump(get_random_articles(count=5), f)
 
     with open(os.path.join(HOME, "sample-image.json"), 'w') as f:
-        json.dump(get_image_info("USA_Wisconsin_location_map.svg"), f)
+        json.dump(get_image_info("Ideogram_human_chromosome_19.svg", 500), f)
 
     with open(os.path.join(HOME, "sample-articles-images.json"), 'w') as f:
-        json.dump(get_random_articles_with_images(5), f)
+        json.dump(get_random_articles_with_images(5, imagesize=500), f)
