@@ -7,7 +7,6 @@
 
 import json
 import os
-import random
 import shutil
 import sys
 import time
@@ -34,7 +33,7 @@ if __name__ == "__main__":
         with open(CONFIGJSON, "r") as f:
             CONFIG = json.load(f)
     except (IOError, ValueError):
-        CONFIG = {'known_ids': []}
+        CONFIG = {'image_size': 500, 'known_ids': []}
 
     # Qbot
 
@@ -69,7 +68,9 @@ if __name__ == "__main__":
 
     NEEDED = len(QBOT['schedule']['hours'])
     WIKIS = get_random_articles_with_images(
-        count=NEEDED, ignoreids=CONFIG['known_ids'])
+        count=NEEDED,
+        imagesize=CONFIG['image_size'],
+        ignoreids=CONFIG['known_ids'])
 
     WIKISPATH = os.path.join(HOME, "wikis")
     if not os.path.exists(WIKISPATH):
