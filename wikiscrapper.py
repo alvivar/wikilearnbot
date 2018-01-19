@@ -93,8 +93,6 @@ def get_wiki_summary(url, minimgsize=None, incfalseimg=False):
     page = requests.get(url, headers=headers)
     soup = BeautifulSoup(page.content, "html.parser")
 
-    data = {}
-
     try:
         title = soup.find('h1', {'id': 'firstHeading'})
         title = title.text if title else False
@@ -140,7 +138,8 @@ def get_wiki_summary(url, minimgsize=None, incfalseimg=False):
     except AttributeError:
         images = False
 
-    data[url] = {
+    data = {
+        'url': url,
         'title': title,
         'description': description,
         'images': images,
@@ -154,11 +153,15 @@ if __name__ == "__main__":
 
     # Testing
 
-    with open(os.path.join(HOME, "sample-summary-en.json"), "w") as f:
+    with open(os.path.join(HOME, "sample-scrap-en.json"), 'w') as f:
         json.dump(get_wiki_summary(get_random_wiki(language="en")), f)
 
-    with open(os.path.join(HOME, "sample-summary-es.json"), "w") as f:
+    with open(os.path.join(HOME, "sample-scrap-es.json"), 'w') as f:
         json.dump(get_wiki_summary(get_random_wiki(language="es")), f)
 
-    with open(os.path.join(HOME, "sample-summary-love.json"), "w") as f:
-        json.dump(get_wiki_summary('https://en.wikipedia.org/wiki/Love'), f)
+    with open(os.path.join(HOME, "sample-scrap-love.json"), 'w') as f:
+        json.dump(
+            get_wiki_summary(
+                'https://en.wikipedia.org/wiki/love',
+                minimgsize=400,
+                incfalseimg=True), f)
