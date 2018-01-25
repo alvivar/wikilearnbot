@@ -102,7 +102,7 @@ if __name__ == "__main__":
 
         # Tweets
 
-        desc = wiki['extract']
+        desc = " ".join(wiki['extract'].split())
         desc = desc if len(desc) < 250 else f"{desc[:250]}[...]"
 
         TWEETS.append({'text': f"{desc} {wiki['pageurl']}", 'image': imgfile})
