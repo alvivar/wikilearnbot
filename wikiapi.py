@@ -92,13 +92,13 @@ def get_random_articles_with_images(count=1,
 
     # Filtering only with images
 
-    print("Looking for articles with images...")
+    print("Looking for articles with images and descriptions...")
     withimages = []
     while len(withimages) < count:
         ranart = get_random_articles(count=count, lang=lang)
         withimages += [
-            d for d in ranart['query']['pages']
-            if 'pageimage' in d and d['pageid'] not in ignoreids
+            d for d in ranart['query']['pages'] if 'pageimage' in d
+            and d['pageid'] not in ignoreids and 'extract' in d
         ]
         withimages = withimages[:count]
         print(f"{round(len(withimages) / count * 100)}%")
